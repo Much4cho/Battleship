@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace Battleship.Models
@@ -8,18 +9,39 @@ namespace Battleship.Models
     {
         readonly int boardSize = Settings.BoardSize;
 
-        public char[,] ShootingBoard { get; private set; }
-        public Battleship[,] MyBoard { get; private set; }
+        public int MyProperty { get; set; }
+
+        // Probably a mistake to use 2D Array cause me some bad blood
+        // After a few tries of transforming this data into readable data
+        // I Decided to change this into a collection of collection it's to stupid to work with
+        //public Battleship[,] MyBoard { get; private set; }
+        public IReadOnlyList<char[]> OffensePanel { get; set; }
+        public IReadOnlyList<IReadOnlyList<Tile>> DeffensePanel { get; set; }
+
         public BattleshipBoard()
         {
-            ShootingBoard = new char[boardSize, boardSize];
-            MyBoard = new Battleship[boardSize, boardSize];
-
+            var rowBuilder = ImmutableArray.CreateBuilder<IReadOnlyList<Tile>>(boardSize);
+            var Tilebuilder = ImmutableArray.CreateBuilder<Tile>();
             for (var i = 0; i < boardSize; i++)
-            for (var j = 0; j < boardSize; j++)
             {
-                ShootingBoard[i, j] = '.';
+                Tilebuilder.Capacity = boardSize;
+                for (var j = 0; j < boardSize; j++)
+                {
+                    Tilebuilder.Add(new Tile());
+                }
+                rowBuilder.Add(Tilebuilder.MoveToImmutable());
             }
+            DeffensePanel = rowBuilder.MoveToImmutable();
+
+            var rowOffenseBuilder = ImmutableArray.CreateBuilder<char[]>(boardSize);
+            for (var i = 0; i < boardSize; i++)
+            {
+                var row = new char[boardSize];
+                Array.Fill(row, '.');
+                rowOffenseBuilder.Add(row);
+            }
+            OffensePanel = rowOffenseBuilder.MoveToImmutable();
+
 
             AddBattleship(2, 3, 3, true);
             AddBattleship(5, 5, 4, false);
@@ -27,29 +49,25 @@ namespace Battleship.Models
 
         public void Shoot(int x, int y)
         {
-            var possibleBattleship = MyBoard[x, y];
+            var possibleBattleship = DeffensePanel[x][y];
 
-            if (possibleBattleship == null) return;
+            if (!possibleBattleship.HasBattleship) return;
 
-            possibleBattleship.GetHit();
+            possibleBattleship.Battleship.GetHit();
 
             // scan
         }
 
-        public string[] GetReadableBoard()
+        public IList<string> GetBoardAsListOfStringRows()
         {
-            //var result = new string[boardSize];
-
-            //Buffer.BlockCopy(MyBoard, 0, result, 0, 10);
-
-            //var result2 =   (from Battleship tile in MyBoard
-            //                select tile != null ? 'O' : '.');
-            //Array
-            //MyBoard.Cop
-            //var result = MyBoard.Batch<Battleship>(boardSize);
-
-            //return result;
-            return new string[1];
+            return DeffensePanel
+                .Select(row => 
+                    string.Join("", 
+                        row.Select(tile => 
+                            tile.HasBattleship 
+                            ? tile.Battleship.Health.ToString()
+                            : ".")))
+                .ToList();
         }
 
         private Battleship AddBattleship(int x, int y, int length, bool vertical)
@@ -62,8 +80,8 @@ namespace Battleship.Models
 
             for (int i = 0; i < length; i++)
             {
-                if (vertical) MyBoard[x, y+i] = battleship;
-                if (!vertical) MyBoard[x+i, y] = battleship;
+                if (vertical) DeffensePanel[x][y+i].Battleship = battleship;
+                if (!vertical) DeffensePanel[x+i][y].Battleship = battleship;
             }
 
             return battleship;
