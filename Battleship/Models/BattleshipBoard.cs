@@ -14,9 +14,10 @@ namespace Battleship.Models
         // Probably a mistake to use 2D Array cause me some bad blood
         // After a few tries of transforming this data into readable data
         // I Decided to change this into a collection of collection it's to stupid to work with
+        // Typical overengineering simple things lol
         //public Battleship[,] MyBoard { get; private set; }
-        public IReadOnlyList<char[]> OffensePanel { get; set; }
         public IReadOnlyList<IReadOnlyList<Tile>> DeffensePanel { get; set; }
+        public IReadOnlyList<char[]> OffensePanel { get; set; }
 
         public BattleshipBoard()
         {
@@ -41,7 +42,6 @@ namespace Battleship.Models
                 rowOffenseBuilder.Add(row);
             }
             OffensePanel = rowOffenseBuilder.MoveToImmutable();
-
 
             AddBattleship(2, 3, 3, true);
             AddBattleship(5, 5, 4, false);
@@ -88,7 +88,5 @@ namespace Battleship.Models
         }
 
     }
-
-
 
 }
