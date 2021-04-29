@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace Battleship.Models
 {
@@ -54,6 +55,32 @@ namespace Battleship.Models
                     X = x;
                     Y = y;
                 }
+            }
+
+            private void TheseBuilderWereUnnecesary()
+            {
+                var boardSize = Settings.BoardSize;
+                var rowBuilder = ImmutableArray.CreateBuilder<IReadOnlyList<Tile>>(boardSize);
+                var Tilebuilder = ImmutableArray.CreateBuilder<Tile>();
+                for (var i = 0; i < boardSize; i++)
+                {
+                    Tilebuilder.Capacity = boardSize;
+                    for (var j = 0; j < boardSize; j++)
+                    {
+                        Tilebuilder.Add(new Tile());
+                    }
+                    rowBuilder.Add(Tilebuilder.MoveToImmutable());
+                }
+                //DeffensePanel = rowBuilder.MoveToImmutable();
+
+                var rowOffenseBuilder = ImmutableArray.CreateBuilder<char[]>(boardSize);
+                for (var i = 0; i < boardSize; i++)
+                {
+                    var row = new char[boardSize];
+                    Array.Fill(row, '.');
+                    rowOffenseBuilder.Add(row);
+                }
+                //OffensePanel = rowOffenseBuilder.MoveToImmutable();
             }
         }
     }
