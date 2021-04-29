@@ -1,5 +1,5 @@
 # Battleship
 
  The app is a interview project. Nothing fancy.
-
- Currently it only generates random ships (without checking if the tile is already taken) and draws them in console
+Shooting Randomly. Missing rule that no 2 ships are neighoburs. and placement doesn't work correctly,
+cause doesn't check if tile is taken by another ship
