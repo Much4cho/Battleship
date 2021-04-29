@@ -94,15 +94,20 @@ namespace Battleship.Models
             return result;
         }
 
-        //TODO have a list of possible tiles to shoot
-        //public IList<(int x, int y)> GetPossibleShot()
-        //{
-        //    var result = new List<(int x, int y)>();
+        public IList<(int x, int y)> GetOpenTiles()
+        {
+            var result = new List<(int x, int y)>();
 
-            
+            for (int i = 0; i < boardSize; i++)
+                for (int j = 0; j < boardSize; j++)
+                {
+                    if(OffensePanel[i][j] == OffenseOcupationTypeEnum.Blank) 
+                        result.Add((i, j));
+                }
 
-        //    return result;
-        //}
+            return result;
+        }
+
 
         public bool TryAddBattleship(int x, int y, int length, bool vertical)
         {
