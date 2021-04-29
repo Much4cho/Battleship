@@ -1,5 +1,8 @@
-﻿using Battleship.Models;
+﻿using Battleship.Enums;
+using Battleship.Models;
 using Battleship.PlayingEngine;
+using System;
+using System.Threading;
 
 namespace Battleship
 {
@@ -26,15 +29,40 @@ namespace Battleship
             shipPlacement.PlaceShips(board1);
             shipPlacement.PlaceShips(board2);
 
-            ConsoleUi.DrawBoard(board1.GetBoardAsListOfStringRows(), 0, 0);
-            ConsoleUi.DrawBoard(board2.GetBoardAsListOfStringRows(), 35, 0);
+            ConsoleUi.DrawBoard(board1.GetBoardAsListOfStringRows(), 0, 1);
+            ConsoleUi.DrawBoard(board2.GetBoardAsListOfStringRows(), 35, 1);
         }
 
         public void Play()
         {
-            
+            while (!board1.HasLost && !board2.HasLost)
+            {
+                var shootingCoord = player1.MakeMove();
+                var shootingResult = board2.GetShot(shootingCoord.x, shootingCoord.y);
+                board1.OffensePanel[shootingCoord.x][shootingCoord.y]
+                    = shootingResult == ShootingResultEnum.Missed
+                        ? OffenseOcupationTypeEnum.Missed
+                        : OffenseOcupationTypeEnum.Hit;
 
-            
+                ConsoleUi.DrawBoard(board1.GetBoardAsListOfStringRows(), 0, 1);
+
+                if (board2.HasLost) break;
+
+                shootingCoord = player2.MakeMove();
+                shootingResult = board1.GetShot(shootingCoord.x, shootingCoord.y);
+                board2.OffensePanel[shootingCoord.x][shootingCoord.y]
+                    = shootingResult == ShootingResultEnum.Missed
+                        ? OffenseOcupationTypeEnum.Missed
+                        : OffenseOcupationTypeEnum.Hit;
+
+
+                ConsoleUi.DrawBoard(board2.GetBoardAsListOfStringRows(), 35, 1);
+
+                //Thread.Sleep(500);
+                Console.ReadKey();
+            }
+
+            ConsoleUi.ShowWinner(board1.HasLost ? "Player 2 Won": "Player 1 Won");
         }
     }
 }

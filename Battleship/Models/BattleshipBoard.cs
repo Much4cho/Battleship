@@ -21,7 +21,7 @@ namespace Battleship.Models
         public IReadOnlyList<IReadOnlyList<Tile>> DeffensePanel { get; }
         // This panel in theory is reduntant because we can have methods in the other's player Board that will let us see already shot tiles
         // I decided to go this route to keep it similar to the way the real game is played
-        public IReadOnlyList<IReadOnlyList<OffenseOcupationTypeEnum>> OffensePanel { get; }
+        public IReadOnlyList<IList<OffenseOcupationTypeEnum>> OffensePanel { get; }
         public bool HasLost => !shipsInformation.Any(ship => DeffensePanel[ship.x][ship.y].Battleship?.IsAlive ?? false);
 
 
@@ -36,37 +36,35 @@ namespace Battleship.Models
                 Tilebuilder.Capacity = boardSize;
                 for (var j = 0; j < boardSize; j++)
                 {
-                    Tilebuilder.Add(new Tile()); //Reference type
+                    Tilebuilder.Add(new Tile());
                 }
                 rowBuilder.Add(Tilebuilder.MoveToImmutable());
             }
             DeffensePanel = rowBuilder.MoveToImmutable();
 
-            var rowOffenseBuilder = ImmutableArray.CreateBuilder<IReadOnlyList<OffenseOcupationTypeEnum>>(boardSize);
+            var rowOffenseBuilder = ImmutableArray.CreateBuilder<IList<OffenseOcupationTypeEnum>>(boardSize);
             for (var i = 0; i < boardSize; i++)
             {
                 var row = new OffenseOcupationTypeEnum[boardSize];
-                Array.Fill(row, OffenseOcupationTypeEnum.Blank); //Value type
-                rowOffenseBuilder.Add(row.ToImmutableArray());
+                Array.Fill(row, OffenseOcupationTypeEnum.Blank);
+                rowOffenseBuilder.Add(row);
             }
             OffensePanel = rowOffenseBuilder.MoveToImmutable();
-
         }
 
-        public void GetShot(int x, int y)
+        public ShootingResultEnum GetShot(int x, int y)
         {
             var possibleBattleship = DeffensePanel[x][y];
 
-            if (!possibleBattleship.HasBattleship) return;
+            if (!possibleBattleship.HasBattleship) return ShootingResultEnum.Missed;
             if (possibleBattleship.HasBeenHit) throw new InvalidOperationException();
 
             var ship = possibleBattleship.Battleship;
             ship.GetHit();
 
-            //if(ship.Health == 0)
-            //{
-            //    DeffensePanel.
-            //}
+            return ship.IsAlive
+                ? ShootingResultEnum.Hit
+                : ShootingResultEnum.Destroyed;
         }
 
         // This might not belong here, as it is specific to the way it's displayed. Gonna leave it for now

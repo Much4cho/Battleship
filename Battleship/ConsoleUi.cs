@@ -13,5 +13,11 @@ namespace Battleship
                 Console.Write(board[i]);
             }
         }
+
+        public static void ShowWinner(string text)
+        {
+            Console.SetCursorPosition(0, 0);
+            Console.Write(text);
+        }
     }
 }

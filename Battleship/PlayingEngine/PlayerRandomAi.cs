@@ -34,7 +34,7 @@ namespace Battleship.PlayingEngine
             //}
             coords = RandomShot();
 
-            Board.GetShot(coords.x, coords.y);
+            //Board.GetShot(coords.x, coords.y);
 
             return coords;
         }

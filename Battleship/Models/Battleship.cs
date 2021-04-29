@@ -11,9 +11,9 @@
             Health = size;
         }
 
-        public bool GetHit()
+        public void GetHit()
         {
-            return --Health > 0;
+            Health--;
         }
 
         public bool IsAlive => Health > 0;
