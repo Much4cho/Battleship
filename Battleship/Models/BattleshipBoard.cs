@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Battleship.Enums;
+using Battleship.Utility;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -15,8 +17,11 @@ namespace Battleship.Models
         // I Decided to change this into a collection of collection it's to stupid to work with
         // Typical overengineering simple things lol
         //public Battleship[,] MyBoard { get; private set; }
+        // These 2 panels could be divided into 2 seperate classes
         public IReadOnlyList<IReadOnlyList<Tile>> DeffensePanel { get; }
-        public IReadOnlyList<char[]> OffensePanel { get; }
+        // This panel in theory is reduntant because we can have methods in the other's player Board that will let us see already shot tiles
+        // I decided to go this route to keep it similar to the way the real game is played
+        public IReadOnlyList<IReadOnlyList<OffenseOcupationTypeEnum>> OffensePanel { get; }
         public bool HasLost => !shipsInformation.Any(ship => DeffensePanel[ship.x][ship.y].Battleship?.IsAlive ?? false);
 
 
@@ -31,18 +36,18 @@ namespace Battleship.Models
                 Tilebuilder.Capacity = boardSize;
                 for (var j = 0; j < boardSize; j++)
                 {
-                    Tilebuilder.Add(new Tile());
+                    Tilebuilder.Add(new Tile()); //Reference type
                 }
                 rowBuilder.Add(Tilebuilder.MoveToImmutable());
             }
             DeffensePanel = rowBuilder.MoveToImmutable();
 
-            var rowOffenseBuilder = ImmutableArray.CreateBuilder<char[]>(boardSize);
+            var rowOffenseBuilder = ImmutableArray.CreateBuilder<IReadOnlyList<OffenseOcupationTypeEnum>>(boardSize);
             for (var i = 0; i < boardSize; i++)
             {
-                var row = new char[boardSize];
-                Array.Fill(row, '.');
-                rowOffenseBuilder.Add(row);
+                var row = new OffenseOcupationTypeEnum[boardSize];
+                Array.Fill(row, OffenseOcupationTypeEnum.Blank); //Value type
+                rowOffenseBuilder.Add(row.ToImmutableArray());
             }
             OffensePanel = rowOffenseBuilder.MoveToImmutable();
 
@@ -64,12 +69,18 @@ namespace Battleship.Models
             //}
         }
 
+        // This might not belong here, as it is specific to the way it's displayed. Gonna leave it for now
         public IList<string> GetBoardAsListOfStringRows()
         {
             var result = new List<string>();
 
             result.Add("*** Offense Board ***");
-            result.AddRange(OffensePanel.Select(x => new string(x)));
+            result.AddRange(OffensePanel
+                            .Select(row =>
+                                string.Join("",
+                                    row.Select(tile =>
+                                        tile.GetCharRepresentation())))
+                            .ToList());
             result.Add("*** Deffense Board ***");
             result.AddRange(DeffensePanel
                             .Select(row =>
