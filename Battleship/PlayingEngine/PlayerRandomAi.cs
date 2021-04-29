@@ -17,7 +17,7 @@ namespace Battleship.PlayingEngine
 
         public void MakeMove()
         {
-            //board.
+            // TODO
         }
     }
 }

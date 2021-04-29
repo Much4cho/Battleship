@@ -83,6 +83,7 @@ namespace Battleship.Models
             return result;
         }
 
+        //TODO have a list of possible tiles to shoot
         //public IList<(int x, int y)> GetPossibleShot()
         //{
         //    var result = new List<(int x, int y)>();

@@ -9,6 +9,7 @@ namespace Battleship.PlayingEngine
     {
         private IList<(int x, int y, int length, bool vertical)> shipsSoFar;
 
+        // TODO check if ships exists already
         public void PlaceShips(BattleshipBoard board)
         {
             shipsSoFar = new List<(int x, int y, int length, bool vertical)>();
