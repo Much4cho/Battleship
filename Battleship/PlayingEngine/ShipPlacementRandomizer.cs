@@ -21,13 +21,13 @@ namespace Battleship.PlayingEngine
             while (shipLenghts.Any())
             {
                 var shipIndex = random.Next(shipLenghts.Count);
-
                 var shipLength = shipLenghts[shipIndex];
                 var vertical = random.Next(2) == 1; // Is it better to random % 2, then e.g. random(2)?? I would assume no, because .net handles it already hopefully
+                
                 var maxX = boardSize;
                 var maxY = boardSize;
-                if (!vertical) maxX = maxX - shipLength;
-                if (vertical)  maxY = maxY - shipLength;
+                if (!vertical) maxX -= shipLength;
+                if (vertical)  maxY -= shipLength;
 
                 (int x, int y, int length, bool vertical) ship = (
                     random.Next(maxX),
@@ -35,12 +35,26 @@ namespace Battleship.PlayingEngine
                     shipLength,
                     vertical); 
 
-                var addingWasSuccesfull = board.TryAddBattleship(ship.x, ship.y, ship.length, ship.vertical);
-                if(addingWasSuccesfull)
+                var addingWasSuccesfull = board.TryAddBattleshipAllowNeighbours(ship.x, ship.y, ship.length, ship.vertical);
+                while(!addingWasSuccesfull)
                 {
-                    shipsSoFar.Add(ship);
-                    shipLenghts.RemoveAt(shipIndex);
+                    vertical = random.Next(2) == 1;
+                    maxX = boardSize;
+                    maxY = boardSize;
+                    if (!vertical) maxX -= shipLength;
+                    if (vertical) maxY -= shipLength;
+
+                    ship = (
+                    random.Next(maxX),
+                    random.Next(maxY),
+                    shipLength,
+                    vertical);
+
+                    addingWasSuccesfull = board.TryAddBattleshipAllowNeighbours(ship.x, ship.y, ship.length, ship.vertical);
                 }
+
+                shipsSoFar.Add(ship);
+                shipLenghts.RemoveAt(shipIndex);
             }
         }
     }

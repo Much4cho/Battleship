@@ -138,7 +138,33 @@ namespace Battleship.Models
                 || vertical && y + length >= boardSize)
                 throw new ArgumentOutOfRangeException();
 
-            //TODO check for existing ships
+            for (int i = 0; i < length; i++)
+            {
+                if (vertical && DeffensePanel[x][y + i].HasBattleship) return false;
+                if (!vertical && DeffensePanel[x + i][y].HasBattleship) return false;
+            }
+
+            foreach (var existingShip in shipsInformation)
+            {
+                //existingShip.
+            }
+
+            AddBattleship(x, y, length, vertical);
+
+            return true;
+        }
+
+        public bool TryAddBattleshipAllowNeighbours(int x, int y, int length, bool vertical)
+        {
+            if (!vertical && x + length >= boardSize
+                || vertical && y + length >= boardSize)
+                throw new ArgumentOutOfRangeException();
+
+            for (int i = 0; i < length; i++)
+            {
+                if(vertical && DeffensePanel[x][y+i].HasBattleship) return false;
+                if(!vertical && DeffensePanel[x+i][y].HasBattleship) return false;
+            }
 
             AddBattleship(x, y, length, vertical);
 
@@ -161,5 +187,4 @@ namespace Battleship.Models
         }
 
     }
-
 }
