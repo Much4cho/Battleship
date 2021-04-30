@@ -20,7 +20,7 @@ namespace Battleship
             board2 = new BattleshipBoard();
 
             player1 = new PlayerRandomAi(board1);
-            player2 = new PlayerRandomAi(board2);
+            player2 = new PlayerSearchingAi(board2);
         }
 
         public void PlaceShips()

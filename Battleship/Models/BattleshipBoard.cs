@@ -12,11 +12,12 @@ namespace Battleship.Models
         readonly int boardSize = Settings.BoardSize;
         private IList<(int x, int y, int length, bool vertical)> shipsInformation;
 
-        // Probably a mistake to use 2D Array cause me some bad blood
+        // Probably a mistake to use 2D Array caused me some bad blood
         // After a few tries of transforming this data into readable data
-        // I Decided to change this into a collection of collection it's to stupid to work with
+        // I Decided to change this into a collection of collection it's too stupid to work with
         // Typical overengineering simple things lol
-        //public Battleship[,] MyBoard { get; private set; }
+        // public Battleship[,] MyBoard { get; private set; }
+
         // These 2 panels could be divided into 2 seperate classes
         public IReadOnlyList<IReadOnlyList<Tile>> DeffensePanel { get; }
         // This panel in theory is reduntant because we can have methods in the other's player Board that will let us see already shot tiles
@@ -29,27 +30,91 @@ namespace Battleship.Models
         {
             shipsInformation = new List<(int x, int y, int length, bool vertical)>();
 
-            var rowBuilder = ImmutableArray.CreateBuilder<IReadOnlyList<Tile>>(boardSize);
-            var Tilebuilder = ImmutableArray.CreateBuilder<Tile>();
+            var deffenseRowBuilder = ImmutableArray.CreateBuilder<IReadOnlyList<Tile>>(boardSize);
+            var deffenseTilebuilder = ImmutableArray.CreateBuilder<Tile>();
             for (var i = 0; i < boardSize; i++)
             {
-                Tilebuilder.Capacity = boardSize;
+                deffenseTilebuilder.Capacity = boardSize;
                 for (var j = 0; j < boardSize; j++)
                 {
-                    Tilebuilder.Add(new Tile());
+                    deffenseTilebuilder.Add(new Tile());
                 }
-                rowBuilder.Add(Tilebuilder.MoveToImmutable());
+                deffenseRowBuilder.Add(deffenseTilebuilder.MoveToImmutable());
             }
-            DeffensePanel = rowBuilder.MoveToImmutable();
+            DeffensePanel = deffenseRowBuilder.MoveToImmutable();
 
-            var rowOffenseBuilder = ImmutableArray.CreateBuilder<IList<OffenseOcupationTypeEnum>>(boardSize);
+            var offenseRowBuilder = ImmutableArray.CreateBuilder<IList<OffenseOcupationTypeEnum>>(boardSize);
             for (var i = 0; i < boardSize; i++)
             {
                 var row = new OffenseOcupationTypeEnum[boardSize];
                 Array.Fill(row, OffenseOcupationTypeEnum.Blank);
-                rowOffenseBuilder.Add(row);
+                offenseRowBuilder.Add(row);
             }
-            OffensePanel = rowOffenseBuilder.MoveToImmutable();
+            OffensePanel = offenseRowBuilder.MoveToImmutable();
+        }
+
+        // This might not belong here, as it is specific to the way it's displayed. Gonna leave it for now
+        public IList<string> GetBoardAsListOfStringRows()
+        {
+            var result = new List<string>();
+
+            var offenseStringRows = OffensePanel
+                            .Select(row =>
+                                string.Join("", row.Select(tile =>
+                                        tile.GetCharRepresentation())));
+
+            var deffenseStringRows = DeffensePanel
+                            .Select(row =>
+                                string.Join("", row.Select(tile =>
+                                    tile.HasBattleship
+                                    ? tile.Battleship.Health.ToString()
+                                    : ".")));
+
+            result.Add("*** Offense Board ***");
+            result.AddRange(offenseStringRows);
+            result.Add("*** Deffense Board ***");
+            result.AddRange(deffenseStringRows);
+
+            return result;
+        }
+
+        public IList<(int x, int y)> GetAllOpenTiles()
+        {
+            var result = new List<(int x, int y)>();
+
+            for (int i = 0; i < boardSize; i++)
+            for (int j = 0; j < boardSize; j++)
+            {
+                if (OffensePanel[i][j] == OffenseOcupationTypeEnum.Blank)
+                    result.Add((i, j));
+            }
+
+            return result;
+        }
+
+        public IList<(int x, int y)> GetNeighbourTilesOfInjuredShips()
+        {
+            var result = new List<(int x, int y)>();
+
+            for (int i = 0; i < boardSize; i++)
+                for (int j = 0; j < boardSize; j++)
+                {
+                    if (OffensePanel[i][j] == OffenseOcupationTypeEnum.Hit)
+                    {
+                        var neigbours = new List<(int x, int y)>(4);
+                    
+                        if (i != 0)             neigbours.Add((i - 1, j));
+                        if (j != 0)             neigbours.Add((i, j - 1));
+                        if (i != boardSize - 1) neigbours.Add((i + 1, j));
+                        if (j != boardSize - 1) neigbours.Add((i, j + 1));
+
+                        var blankNeighbours = neigbours.Where(coord => 
+                                OffensePanel[coord.x][coord.y] == OffenseOcupationTypeEnum.Blank);
+                        result.AddRange(blankNeighbours);
+                    }
+                }
+
+            return result.Distinct().ToList();
         }
 
         public ShootingResultEnum GetShot(int x, int y)
@@ -67,56 +132,13 @@ namespace Battleship.Models
                 : ShootingResultEnum.Destroyed;
         }
 
-        // This might not belong here, as it is specific to the way it's displayed. Gonna leave it for now
-        public IList<string> GetBoardAsListOfStringRows()
-        {
-            var result = new List<string>();
-
-            result.Add("*** Offense Board ***");
-            result.AddRange(OffensePanel
-                            .Select(row =>
-                                string.Join("",
-                                    row.Select(tile =>
-                                        tile.GetCharRepresentation())))
-                            .ToList());
-            result.Add("*** Deffense Board ***");
-            result.AddRange(DeffensePanel
-                            .Select(row =>
-                                string.Join("",
-                                    row.Select(tile =>
-                                        tile.HasBattleship
-                                        ? tile.Battleship.Health.ToString()
-                                        : ".")))
-                            .ToList());
-
-            return result;
-        }
-
-        public IList<(int x, int y)> GetOpenTiles()
-        {
-            var result = new List<(int x, int y)>();
-
-            for (int i = 0; i < boardSize; i++)
-                for (int j = 0; j < boardSize; j++)
-                {
-                    if(OffensePanel[i][j] == OffenseOcupationTypeEnum.Blank) 
-                        result.Add((i, j));
-                }
-
-            return result;
-        }
-
-
         public bool TryAddBattleship(int x, int y, int length, bool vertical)
         {
             if (!vertical && x + length >= boardSize
                 || vertical && y + length >= boardSize)
                 throw new ArgumentOutOfRangeException();
 
-            if (true)
-            {
-
-            }
+            //TODO check for existing ships
 
             AddBattleship(x, y, length, vertical);
 
