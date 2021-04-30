@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 
 namespace Battleship.Models
 {
+    // UNUSED class of mistakes, for talking points
     class MistakesHappen
     {
         // Bad choice because map should be able to manage itself and needs to know where ships are on the map
@@ -55,32 +56,6 @@ namespace Battleship.Models
                     X = x;
                     Y = y;
                 }
-            }
-
-            private void TheseBuilderWereUnnecesary()
-            {
-                var boardSize = Settings.BoardSize;
-                var rowBuilder = ImmutableArray.CreateBuilder<IReadOnlyList<Tile>>(boardSize);
-                var Tilebuilder = ImmutableArray.CreateBuilder<Tile>();
-                for (var i = 0; i < boardSize; i++)
-                {
-                    Tilebuilder.Capacity = boardSize;
-                    for (var j = 0; j < boardSize; j++)
-                    {
-                        Tilebuilder.Add(new Tile());
-                    }
-                    rowBuilder.Add(Tilebuilder.MoveToImmutable());
-                }
-                //DeffensePanel = rowBuilder.MoveToImmutable();
-
-                var rowOffenseBuilder = ImmutableArray.CreateBuilder<char[]>(boardSize);
-                for (var i = 0; i < boardSize; i++)
-                {
-                    var row = new char[boardSize];
-                    Array.Fill(row, '.');
-                    rowOffenseBuilder.Add(row);
-                }
-                //OffensePanel = rowOffenseBuilder.MoveToImmutable();
             }
         }
     }
