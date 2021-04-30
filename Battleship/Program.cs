@@ -9,6 +9,11 @@ namespace Battleship
         {
             var engine = new GameEngine();
 
+            Console.SetWindowSize(90, 30);
+            Console.SetBufferSize(90, 30);
+
+            ConsoleUi.MovingScreen();
+
             engine.PlaceShips();
             Console.ReadKey();
 

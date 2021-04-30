@@ -62,6 +62,7 @@ namespace Battleship
                 Console.ReadKey();
             }
 
+            ConsoleUi.MovingScreen();
             ConsoleUi.ShowWinner(board1.HasLost ? "Player 2 Won": "Player 1 Won");
         }
     }
