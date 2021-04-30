@@ -22,25 +22,15 @@ namespace Battleship.PlayingEngine
             {
                 var shipIndex = random.Next(shipLenghts.Count);
                 var shipLength = shipLenghts[shipIndex];
-                var vertical = random.Next(2) == 1; // Is it better to random % 2, then e.g. random(2)?? I would assume no, because .net handles it already hopefully
-                
-                var maxX = boardSize;
-                var maxY = boardSize;
-                if (!vertical) maxX -= shipLength;
-                if (vertical)  maxY -= shipLength;
 
-                (int x, int y, int length, bool vertical) ship = (
-                    random.Next(maxX),
-                    random.Next(maxY),
-                    shipLength,
-                    vertical); 
+                (int x, int y, int length, bool vertical) ship = default;
 
-                var addingWasSuccesfull = board.TryAddBattleshipAllowNeighbours(ship.x, ship.y, ship.length, ship.vertical);
-                while(!addingWasSuccesfull)
+                var addingWasSuccesfull = false;
+                while (!addingWasSuccesfull)
                 {
-                    vertical = random.Next(2) == 1;
-                    maxX = boardSize;
-                    maxY = boardSize;
+                    var vertical = random.Next(2) == 1;
+                    var maxX = boardSize;
+                    var maxY = boardSize;
                     if (!vertical) maxX -= shipLength;
                     if (vertical) maxY -= shipLength;
 
