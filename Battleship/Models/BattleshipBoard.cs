@@ -11,6 +11,7 @@ namespace Battleship.Models
     {
         readonly int boardSize = Settings.BoardSize;
         private IList<(int x, int y, int length, bool vertical)> shipsInformation;
+        private ISet<(int x, int y)> coordsOfTilesThatCantHaveShips;
 
         // Probably a mistake to use 2D Array caused me some bad blood
         // After a few tries of transforming this data into readable data
@@ -28,6 +29,7 @@ namespace Battleship.Models
 
         public BattleshipBoard()
         {
+            coordsOfTilesThatCantHaveShips = new HashSet<(int, int)>();
             shipsInformation = new List<(int x, int y, int length, bool vertical)>();
 
             var deffenseRowBuilder = ImmutableArray.CreateBuilder<IReadOnlyList<Tile>>(boardSize);
@@ -140,13 +142,8 @@ namespace Battleship.Models
 
             for (int i = 0; i < length; i++)
             {
-                if (vertical && DeffensePanel[x][y + i].HasBattleship) return false;
-                if (!vertical && DeffensePanel[x + i][y].HasBattleship) return false;
-            }
-
-            foreach (var existingShip in shipsInformation)
-            {
-                //existingShip.
+                if (vertical && coordsOfTilesThatCantHaveShips.Contains((x,y + i))) return false;
+                if (!vertical && coordsOfTilesThatCantHaveShips.Contains((x + i, y))) return false;
             }
 
             AddBattleship(x, y, length, vertical);
@@ -175,10 +172,20 @@ namespace Battleship.Models
         {
             var battleship = new Battleship(length);
 
+            var xTemp = x;
+            var yTemp = y;
             for (int i = 0; i < length; i++)
             {
-                if (vertical) DeffensePanel[x][y+i].Battleship = battleship;
-                if (!vertical) DeffensePanel[x+i][y].Battleship = battleship;
+                DeffensePanel[xTemp][yTemp].Battleship = battleship;
+
+                coordsOfTilesThatCantHaveShips.Add((xTemp, yTemp));
+                if (xTemp != 0) coordsOfTilesThatCantHaveShips.Add((xTemp - 1, yTemp));
+                if (yTemp != 0) coordsOfTilesThatCantHaveShips.Add((xTemp, yTemp - 1));
+                if (xTemp != boardSize - 1) coordsOfTilesThatCantHaveShips.Add((xTemp + 1, yTemp));
+                if (yTemp != boardSize - 1) coordsOfTilesThatCantHaveShips.Add((xTemp, yTemp + 1));
+
+                if (vertical) yTemp++;
+                else xTemp++;
             }
 
             shipsInformation.Add((x, y, length, vertical));

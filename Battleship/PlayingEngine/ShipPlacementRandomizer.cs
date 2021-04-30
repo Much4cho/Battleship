@@ -35,12 +35,12 @@ namespace Battleship.PlayingEngine
                     if (vertical) maxY -= shipLength;
 
                     ship = (
-                    random.Next(maxX),
-                    random.Next(maxY),
-                    shipLength,
-                    vertical);
+                        random.Next(maxX),
+                        random.Next(maxY),
+                        shipLength,
+                        vertical);
 
-                    addingWasSuccesfull = board.TryAddBattleshipAllowNeighbours(ship.x, ship.y, ship.length, ship.vertical);
+                    addingWasSuccesfull = board.TryAddBattleship(ship.x, ship.y, ship.length, ship.vertical);
                 }
 
                 shipsSoFar.Add(ship);
